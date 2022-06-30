@@ -12,7 +12,7 @@ import { CatToyEntity } from './cat-toy.entity'
 
 
 @Entity()
-export class CatEntity {
+export class ToyEntity {
     @PrimaryGeneratedColumn()
     id?: number
 
@@ -22,11 +22,9 @@ export class CatEntity {
     @Column()
     color: string
 
-    @Column({ nullable: true })
-    age: number | null
 
-    @OneToMany(() => CatToyEntity, (catToy) => catToy.cat_toy)
+    @OneToMany(() => CatToyEntity, (catToy) => catToy.toy_cat)
     @JoinColumn()
-    cat_toy?: CatToyEntity[]
+    toy_cat?: CatToyEntity[]
 
 }

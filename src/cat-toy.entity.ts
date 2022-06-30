@@ -1,5 +1,6 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import { CatEntity } from './cat.entity'
+import { ToyEntity } from './toy.entity'
 
 @Entity()
 export class CatToyEntity {
@@ -7,11 +8,20 @@ export class CatToyEntity {
     id?: number
 
     @Column()
-    name: string
+    cat_id:number
 
-    @ManyToOne(() => CatEntity, (cat) => cat.toys)
+    @Column()
+    toy_id:number
+
+    @ManyToOne(() => CatEntity, (cat) => cat.cat_toy)
+    @JoinColumn({
+        name:"cat_id"
+    })
+    cat_toy?: CatEntity
+
+    @ManyToOne(() => ToyEntity, (toy) => toy.toy_cat)
     @JoinColumn()
-    cat?: CatEntity
+    toy_cat?: ToyEntity
 
     @CreateDateColumn()
     createdAt: string

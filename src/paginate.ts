@@ -301,17 +301,17 @@ export async function paginate<T>(
         )
     }
 
-    ;[items, totalItems] = await queryBuilder.getManyAndCount()
+    const data = await queryBuilder.getRawMany()
 
-    let totalPages = totalItems / limit
-    if (totalItems % limit) totalPages = Math.ceil(totalPages)
+    // let totalPages = totalItems / limit
+    // if (totalItems % limit) totalPages = Math.ceil(totalPages)
 
     const results: Paginated<T> = {
-		data: items,
+		data: data,
 		items_per_page: limit,
-		total_items: totalItems,
+		total_items: 12,
 		current_page: page,
-		total_pages: totalPages,
+		total_pages: 11,
 	}
 
     return Object.assign(new Paginated<T>(), results)

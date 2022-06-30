@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { CatHomeEntity } from './cat-home.entity';
 import { CatToyEntity } from './cat-toy.entity';
 import { CatEntity } from './cat.entity';
+import { ToyEntity } from './toy.entity';
 
 @Module({
   imports: [TypeOrmModule.forRoot({
@@ -17,7 +17,7 @@ import { CatEntity } from './cat.entity';
     entities: [__dirname + '/**/*.entity.{js,ts}'],
     synchronize: true,
   }),
-  TypeOrmModule.forFeature([CatHomeEntity,CatToyEntity,CatEntity])
+  TypeOrmModule.forFeature([ToyEntity,CatToyEntity,CatEntity])
   ],
   controllers: [AppController],
   providers: [AppService],

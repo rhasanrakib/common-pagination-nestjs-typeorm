@@ -5,6 +5,7 @@ import { CatEntity } from './cat.entity';
 import { CatToyEntity } from './cat-toy.entity';
 import { PaginationParams } from './pagination-params.dto';
 import { Pagination } from './decorator';
+import { ToyEntity } from './toy.entity';
 
 @Controller()
 export class AppController {
@@ -13,15 +14,16 @@ export class AppController {
   @Get()
   async getHello(@Query(new Pagination())query: PaginationParams) {
     return await this.appService.findAll(query);
+    //return await this.appService.manager();
   }
   @Post()
   async create() {
-    return await this.appService.create(this.cat(),this.catToy(),this.catToy())
+    return await this.appService.create(this.cat(),this.cat(),this.toy(),this.toy())
   }
-  catToy(): CatToyEntity {
+  toy(): ToyEntity {
     return {
       name: faker.name.firstName(),
-      createdAt: new Date().toISOString(),
+      color:faker.color.human()
     }
   }
   cat(): CatEntity {
@@ -29,7 +31,6 @@ export class AppController {
       name: faker.name.firstName(),
       age: parseInt(faker.random.numeric(2)),
       color: faker.color.human(),
-      createdAt: new Date().toISOString(),
     }
   }
 }
