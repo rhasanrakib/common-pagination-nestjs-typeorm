@@ -17,20 +17,20 @@ export class AppService {
     @InjectRepository(ToyEntity) private toy: Repository<ToyEntity>,
     @InjectConnection() private readonly connection: Connection,
   ) { }
-  public async findAll(query: PaginationParams): Promise<Paginated<CatEntity>> {
-    console.log(await this.manager());
-    return await paginate(query, this.cat, {
-      sortableColumns: ['id', 'name', 'color', 'age'],
-      searchableColumns: ['name', 'color', 'age'],
-      defaultSortBy: [['id', 'DESC']],
-      filterableColumns: {
-        age: [FilterOperator.GTE, FilterOperator.LTE],
-        name: [FilterOperator.LIKE,FilterOperator.EQ]
-      },
-      relations:['cat_toy']
-    })
+  public async findAll(query: PaginationParams): Promise<any> {
+    return await this.services()
+    // return await paginate(query, this.cat, {
+    //   sortableColumns: ['id', 'name', 'color', 'age'],
+    //   searchableColumns: ['name', 'color', 'age'],
+    //   defaultSortBy: [['id', 'DESC']],
+    //   filterableColumns: {
+    //     age: [FilterOperator.GTE, FilterOperator.LTE],
+    //     name: [FilterOperator.LIKE,FilterOperator.EQ]
+    //   },
+    //   relations:['cat_toy']
+    // })
   }
-  async manager() {
+  async services(){
     const a = {
       relations: {
         cat_entity: {
@@ -51,17 +51,18 @@ export class AppService {
               }
             }
           }
-        },
-        cat_home:{
-          primary_key: "id",
-          foregin_key: "",
-          select_col: ["name","color","age"],
         }
-      },
+      }
     }
+    const joinq= await this.manager(a);
+    console.log(joinq);
+    return this.connection.query(joinq);
+  }
+  async manager(config) {
+    
     let joinQuery = "";
     let colSelect ="";
-    const relation = a.relations;
+    const relation = config.relations;
 
     function internalJoin(entity,relationObj){
       if(!entity || !relationObj){
@@ -71,7 +72,7 @@ export class AppService {
       if(relationObj[entity].hasOwnProperty("select_col")){
         if(relationObj[entity].select_col.length>0){
           for (const col of relationObj[entity].select_col) {
-            colSelect += `${entity}.${col},`;
+            colSelect += `${entity}.${col} AS ${entity}_${col} ,`;
           }
         }
       }
@@ -85,7 +86,7 @@ export class AppService {
       if(relationObj[entity].hasOwnProperty("join")){
         
         const nextKey = Object.keys(relationObj[entity].join)[0];
-        joinQuery+= " LEFT JOIN "+ entity + " ON "+ entity+"."+relationObj[entity].foregin_key +" = ";
+        joinQuery+= " LEFT JOIN "+ nextKey + " ON "+ entity+"."+relationObj[entity].foregin_key +" = ";
         const nextObj = relationObj[entity]['join']
         internalJoin(nextKey, nextObj)
       }else{
@@ -101,7 +102,8 @@ export class AppService {
         joinQuery+= " LEFT JOIN "+ entity + " ON "+ entity+"."+relation[entity].foregin_key +" = ";
       } 
     }
-    return {colSelect,joinQuery};
+    colSelect = colSelect.slice(0, -1)
+    return `SELECT ${colSelect} FROM ${Object.keys(relation)[0]} ${joinQuery}`;
     const query = `SELECT cat_entity.name as cat_name, cat_entity.color, cat_entity.age, toy_entity.name, toy_entity.color as toy_color from cat_entity LEFT JOIN cat_toy_entity ON cat_entity.id= cat_toy_entity.cat_id LEFT JOIN toy_entity ON cat_toy_entity.toy_id = toy_entity.id LIMIT 0, 2;`
     //return this.connection.query(query);
   }
@@ -120,7 +122,7 @@ export class AppService {
     cattoy = new CatToyEntity()
     cattoy.cat_id = cats2.id;
     cattoy.toy_id = toy2.id;
-    await this.catToy.save(cattoy)
+    return await this.catToy.save(cattoy)
 
   }
 }
