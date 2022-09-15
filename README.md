@@ -1,73 +1,93 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+### Operators
+```
+    eq :'=',
+    neq : '<>',
+    gt : '>',
+    gte : '>=',
+    lt : '<',
+    lte : '<=',
+    ngt :'!>',
+    nlt : '!<',
+    not : '!',
+    in : 'IN',
+    btw : 'BETWEEN',
+    nbtw : 'NOT BETWEEN',
+    nin : 'NOT IN'
+```
+### Request
+```
+route?where_name[like]=rakib&filter_age[gte]=20&filter_age[lte]=30&filter_marks[btw]=80:90&filter_position[nbtw]=20:30&filter_class[in]=13&filter_class[in]=14&filter_class[in]=15&sort_by_height=ASC&page=1&per_page=10
+```
+### Response
+```JSON
+{
+    "data": [
+        {
+            "id": 4,
+            "name": "saa",
+            "description": "asdfgh awetaefbgf",
+            "url": "https://www.ff.com",
+            "status_id": 1000
+        }
+    ],
+    "items_per_page": 1,
+    "total_items": 3,
+    "current_page": 1,
+    "total_pages": 3
+}
+```
+### Parameter Description
+* where_ : `where_fieldName[like|eq] = ?`
+* filter_ : `filter_fieldName[operator]=?`
+    * between: `filter_fieldName[btw]=min:max`
+    * not between: `filter_fieldName[btw]=min!max`
+    * in : `filter_fieldName[in]=?  filter_fieldName[in]=?` this value willbe array type
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+### Config 
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+* sortableColumns: An array of column names (string) of the repository that allow for sort ex. `['id', 'name']`. <b> At least one is required, otherwise error will be thrown.</b>
+* searchableColumns: An array of column names (string) of the repository that are allowed for search.Remarks: Search operation only allows 'like' and 'eq' operators. ex. `['name']`,
+* defaultSortBy: Array of `['column_name','ASC|DESC']` ex . `[['roll','ASC'],['id':'DESC']]`. If no sortableColumns are selected or no sort params from query params then the data will sort by the default values given in the defaultSortBy.
+* filterableColumns: An array of column name(string) of the repository that allow for filter ex. `['id','age']`,
+* defaultLimit: Default data LIMIT. The default limit will work if the query params 'take' is undefined. If the take is defined then default value will be the take's value, follow the limit logic.
+* maxLimit: Maximum Data Limit.
 
-## Description
+``` limit= min(take || defaultLimit || 15, maxLimit || 100) ```
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+* relations: Array of table names that are related to this table. Only left join is allowed here.
 
-## Installation
+### Pagination Pipe
 
-```bash
-$ npm install
+`shared/pipes/paginationPipe.pipe.ts`
+
+It converts the query string to 
+
+### Usage
+In `controller.ts`
+
+```typescript
+import { PaginationParamsDto } from "../../shared/dtos/pagination-params.dto"
+import { PaginationPipe } from "../../shared/pipes/paginationPipe.pipe"
+
+@Get("/")
+async index(@Query(new PaginationPipe()) query : PaginationParamsDto){
+     return await this.vendorSvc.findAll(query);
+}
 ```
 
-## Running the app
+In `service.ts`
 
-```bash
-# development
-$ npm run start
+```typescript
+import { paginate } from "../../shared/paginate"
+import { PaginationParamsDto } from "../../shared/dtos/pagination-params.dto"
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+async findAll(query:PaginationParamsDto):Promise<Paginate<Vendor>>{
+	return paginate(query, this.repository, {
+		sortableColumns: ['id', 'name'],
+		searchableColumns: ['name','description'],
+		defaultSortBy: [['id', 'DESC']],
+		filterableColumns: ['id'],
+		defaultLimit:1,
+	})
+}
+``` 
